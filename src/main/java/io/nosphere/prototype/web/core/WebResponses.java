@@ -1,6 +1,7 @@
 package io.nosphere.prototype.web.core;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -41,21 +42,25 @@ public class WebResponses {
     }
 
     public static <T> Map<String, Object> page(Page<T> response) {
-        return ImmutableMap.<String, Object>builder()
+        return response.hasContent()
+                ? ImmutableMap.<String, Object>builder()
                 .put("status", HttpStatus.OK.value())
                 .put("data", response.getContent())
                 .put("totalCount", response.getTotalElements())
                 .put("totalPages", response.getTotalPages())
                 .put("currentPage", response.getNumber())
                 .put("currentPageSize", response.getSize())
-                .build();
+                .build()
+                : NO_CONTENT;
     }
 
-    public static <T> Map<String, Object> single(T response) {
-        return ImmutableMap.<String, Object>builder()
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    public static <T> Map<String, Object> single(Optional<T> response) {
+        return response.map(data -> (Map<String, Object>) ImmutableMap.<String, Object>builder()
                 .put("status", HttpStatus.OK.value())
-                .put("data", response)
-                .build();
+                .put("data", data)
+                .build())
+                .orElse(NO_CONTENT);
     }
 
     public static Map<String, Object> noContent() {

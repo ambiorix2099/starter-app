@@ -4,10 +4,10 @@ import java.util.Map;
 
 import io.nosphere.prototype.core.contacts.Contact;
 import io.nosphere.prototype.core.contacts.ContactService;
+import io.nosphere.prototype.web.core.WebResponses;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import io.nosphere.prototype.web.core.WebResponses;
 
 @RestController
 @RequestMapping("api")
@@ -33,8 +31,7 @@ public class ContactWebService {
     public Map<String, Object> finaAllContacts(@RequestParam(name = "page", required = false, defaultValue = "0") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size) {
         try {
-            final Page<Contact> contacts = contactService.findAll(page, size);
-            return contacts.hasContent() ? WebResponses.page(contacts) : WebResponses.noContent();
+            return WebResponses.page(contactService.findAll(page, size));
         } catch (Exception e) {
             log.error(e.getMessage());
             return WebResponses.error(e);
@@ -44,9 +41,7 @@ public class ContactWebService {
     @GetMapping(path = "contacts/{id}")
     public Map<String, Object> finaById(@PathVariable(name = "id") long id) {
         try {
-            return contactService.findById(id)
-                    .map(WebResponses::single)
-                    .orElse(WebResponses.noContent());
+            return WebResponses.single(contactService.findById(id));
         } catch (Exception e) {
             log.error(e.getMessage());
             return WebResponses.error(e);
